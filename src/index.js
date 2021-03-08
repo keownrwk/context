@@ -1,17 +1,84 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+const UserContext = React.createContext();
+class UserStore extends React.Component {
+    state = {
+    user:
+        { avatar: "https://www.gravatar.com/avatar/5c3dd2d257ff0e14dbd2583485dbd44b",
+        name: "Dave",
+        followers: 1234,
+        following: 123
+    } };
+    render() { return (
+        <UserContext.Provider value={this.state.user}>
+            {this.props.children}
+        </UserContext.Provider>
+    ); }
+}
+// ... other components are unchaged ...
+
+const UserAvatar = ({size}) => (
+    <UserContext.Consumer>
+        { user =>(
+            <img
+                className={`user-avatar ${size || ""}`}
+                alt="user avatar"
+                src={user.avatar}
+                />
+        )}
+    </UserContext.Consumer>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+const UserStats = () => (
+    <UserContext.Consumer>
+        {user =>(
+            <div className='user-stats'>
+                <div>
+                    <UserAvatar user={user} />
+                    {user.name}
+                </div>
+                <div className="stats">
+                    <div>{user.followers} Followers</div>
+                    <div>Following {user.following}</div>
+                </div>
+            </div>
+        )}
+    </UserContext.Consumer>
+);
+
+const Nav = () => (
+    <div className="nav">
+        <UserAvatar size='small' />
+    </div>
+);
+
+const Content = () => (
+    <div className="content">
+        main content here
+    </div>
+);
+
+const Sidebar = () => (
+    <div className="sidebar">
+        <UserStats />
+    </div>
+);
+
+const Body = () => (
+    <div className="body">
+        <Sidebar />
+        <Content />
+    </div>
+);
+
+const App = () => ( <div className="app">
+        <Nav />
+        <Body />
+    </div>
+);
+ReactDOM.render( <UserStore>
+        <App />
+    </UserStore>, document.querySelector("#root")
+);
